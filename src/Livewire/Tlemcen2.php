@@ -316,8 +316,19 @@ class Tlemcen2 extends Component
 
        }
 
+       elseif($heureajoute->userid != 0) {
+         
+          $this->js("
+               Swal.fire({
+                 title: 'Attentio!',
+                 text: 'le rendez vous a déja ete pris',
+                 icon: 'error',
+                 confirmButtonText: 'valider'
+                               })
+                           ");
 
-     
+       }
+
 
      }
 
