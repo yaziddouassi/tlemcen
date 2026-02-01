@@ -1,0 +1,29 @@
+{
+    "name": "tlemcen/tlemcen",
+    "description": "laravel livewire Rendez vous",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tlemcen\\Tlemcen\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel" : {
+            "providers": [
+               "Tlemcen\\Tlemcen\\TlemcenServiceProvider"
+            ] 
+        }
+    },
+    "authors": [
+        {
+            "name": "yaziddouassi",
+            "email": "rabahdouassi@yahoo.fr"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.2"
+    }
+}
