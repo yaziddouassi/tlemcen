@@ -54,6 +54,7 @@
                             @click="openModal1('{{$heure->debut}}','{{$heure->fin}}','{{$heure->id}}')"
                             >- Ajouter un rendez-vous</div>
                             <div class="cursor-pointer"
+                            wire:confirm="voulez vous supprimer l heure?"
                             wire:click="supprimerHeure2({{$heure->id}})"
                             >- Supprimer l'heure</div>
                         </div>
@@ -80,9 +81,11 @@
                             @click="openModal2('{{$heure->debut}}','{{$heure->fin}}','{{$heure->id}}')"
                             >- Modifier le rendez-vous</div>
                             <div class="cursor-pointer"
+                             wire:confirm="voulez vous supprimer l heure?"
                              wire:click="supprimerHeure({{$heure->id}})"
                             >- Supprimer l'heure</div>
                             <div class="cursor-pointer"
+                            wire:confirm="voulez vous supprimer le rendez-vous?"
                             wire:click="supprimerRdv({{$heure->id}})">- Supprimer le rendez-vous</div>
                         </div>
                       </div>
