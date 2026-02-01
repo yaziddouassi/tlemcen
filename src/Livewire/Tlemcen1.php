@@ -19,7 +19,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class Tlemcen1 extends Component
 {
-    
+    use WithPagination;
+    public $search = '';
+
     public function mount()
     {
        
@@ -28,7 +30,20 @@ class Tlemcen1 extends Component
 
     public function render()
     {
-        return view('tlemcen::livewire.tlemcen1')
+
+         if($this->search == '') {
+           $users = \App\Models\User::paginate(4);
+        }
+
+        if($this->search != '') {
+           $users = \App\Models\User::where('name', 'like', '%'.$this->search.'%')
+                                      ->orWhere('prenom', 'like', '%'.$this->search.'%')
+                                     ->paginate(4);
+        }
+
+
+        return view('tlemcen::livewire.tlemcen1',
+                     ['users' => $users])
         ->layout('tlemcen::layouts.app');
     }
 }
