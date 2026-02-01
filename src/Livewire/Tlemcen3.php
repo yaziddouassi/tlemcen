@@ -31,6 +31,16 @@ class Tlemcen3 extends Component
     public $currentdate;
     public $lesjours;
 
+    
+      public function logout()
+{
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+}
+
     public function mount($madate)
     {
         $rdvous = new Rdvous() ;

@@ -14,7 +14,14 @@ x-show="$store.navbarre1.open2">
       </div>
          
       <div class="flex items-center justify-center p-4">
-                DDDEc222
+          <div>
+            <button class="text-[24px]"
+               type="button"
+               wire:click="logout"
+               wire:confirm="voulez vous deconecter?">
+             Déconnexion
+          </button>
+          </div>
       </div>
         
 </div>

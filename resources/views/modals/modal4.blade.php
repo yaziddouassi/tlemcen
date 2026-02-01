@@ -57,18 +57,6 @@ x-show="$wire.open2">
 
               </div>
 
-              <div x-text="$wire.heureDebut">
-
-              </div>
-
-              <div x-text="$wire.heureFin">
-
-              </div>
-
-              <div x-text="$wire.heureId">
-
-              </div>
-
                <div class="p-[10px] pt-[20px]">
                  {{ $users->links('tlemcen::pagination.rendezvous') }}
                </div>

@@ -22,9 +22,22 @@ class Tlemcen1 extends Component
     use WithPagination;
     public $search = '';
 
+      public function logout()
+{
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+}
+
     public function mount()
     {
        
+    }
+
+    public function annulerSearch() {
+        $this->search = '';
     }
 
 

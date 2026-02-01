@@ -24,6 +24,26 @@
                    </div>
               </div>
 
+               <div class="mt-[10px]">
+                
+                  <div class="p-[10px] grid gap-3 grid-cols-1 min-[600px]:grid-cols-2
+                    min-[900px]:grid-cols-3">
+                      @foreach ($users as $key => $user)
+                      <div class="bg-white p-[10px] rounded-[5px]">
+                         <div class="w-full">
+                            <div>- {{$user->prenom}} {{$user->name}}</div>
+                            <div class="pl-[11px]">{{$user->email}}</div>
+                         </div>
+                      </div>
+                      @endforeach
+                  </div>
+
+              </div>
+
+               <div class="p-[10px] pt-[20px]">
+                 {{ $users->links('tlemcen::pagination.rendezvous') }}
+               </div>
+
 
 
 

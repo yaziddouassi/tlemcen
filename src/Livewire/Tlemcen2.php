@@ -46,6 +46,16 @@ class Tlemcen2 extends Component
 
     public $lesheures ;
 
+    
+      public function logout()
+{
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+}
+
     public function mount($madate)
     {
         $rdvous = new Rdvous() ;
@@ -253,8 +263,8 @@ class Tlemcen2 extends Component
     if($heureajoute) {
         $heureajoute->userid = $userid ;
         $heureajoute->usernom =  $username;
-        $heureajoute->usermail = $userprenom ;
-        $heureajoute->userprenom = $usermail;
+        $heureajoute->usermail = $usermail;
+        $heureajoute->userprenom = $userprenom;
         $heureajoute->usertelephone = $usertelephone;
         $heureajoute->useradresse = $useradresse;
         $heureajoute->save();

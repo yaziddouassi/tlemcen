@@ -45,26 +45,15 @@ x-show="$wire.open3">
                             <div class="pl-[11px]">{{$user->email}}</div>
                          </div>
                          <div class="min-w-[55px]">
-                             <button wire:click="modifierRdv('{{$user->id}}','{{$user->name}}',
+                             <button class="bg-[blue] text-white px-3 py-2 rounded-[3px]"
+                             wire:click="modifierRdv('{{$user->id}}','{{$user->name}}',
                              '{{$user->prenom}}','{{$user->email}}','{{$user->telephone}}',
                              '{{$user->adresse}}')">
-                              RDV3 </button>
+                              RDV </button>
                          </div>
                       </div>
                       @endforeach
                   </div>
-
-              </div>
-
-              <div x-text="$wire.heureDebut">
-
-              </div>
-
-              <div x-text="$wire.heureFin">
-
-              </div>
-
-              <div x-text="$wire.heureId">
 
               </div>
 

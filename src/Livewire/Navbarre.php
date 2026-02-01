@@ -9,11 +9,15 @@ use Illuminate\Support\Facades\File;
 
 class Navbarre extends Component
 {
-    
-    public function mount()
-    {
-       
-    }
+  
+    public function logout()
+{
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+}
 
     public function render()
     {

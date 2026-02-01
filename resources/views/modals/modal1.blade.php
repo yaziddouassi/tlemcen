@@ -14,7 +14,7 @@ x-show="$store.navbarre1.open1">
       </div>
          
       <div class="flex items-center justify-center p-4">
-                DDDEc 
+         <a href="/admin" wire:navigate class="text-[24px]">Dashboard</a>
       </div>
         
 </div>
