@@ -29,6 +29,26 @@
                <div class="w-full min-h-[378px] 
                  border-[1px] border-[#bbb] rounded-[8px]">
 
+                 <div class="text-center pt-[10px]">
+                  @if($jouractif->status == 'oui')
+                   <span class="text-green-400 font-bold text-[20px]">Actif</span> &nbsp;
+                   <button wire:click="desactiver()"
+                    wire:confirm="voulez vous desactiver la journée?"
+                    class="border-[2px] rounded-[4px] font-bold text-blue-800 border-blue-800
+                   py-2 px-3 ">
+                   Desactiver</button>
+                  @endif
+                    @if($jouractif->status == 'non')
+                   <span class="text-red-400 font-bold text-[20px]">Non Actif</span> &nbsp;
+                   <button wire:click="activer()"
+                    wire:confirm="voulez vous activer la journée?"
+                    class="rounded-[4px] font-bold text-white bg-blue-800
+                   py-2 px-3 ">
+                   Activer</button>
+                  @endif
+                  
+                 </div>
+
                   <div class="flex justify-center">
                     <div class="mt-[15px]">
                       <svg @click="$wire.open1=true"
@@ -85,7 +105,7 @@
                              wire:click="supprimerHeure({{$heure->id}})"
                             >- Supprimer l'heure</div>
                             <div class="cursor-pointer"
-                            wire:confirm="voulez vous supprimer le rendez-vous?"
+                             wire:confirm="voulez vous supprimer le rendez-vous?"
                             wire:click="supprimerRdv({{$heure->id}})">- Supprimer le rendez-vous</div>
                         </div>
                       </div>

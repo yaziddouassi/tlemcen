@@ -48,6 +48,7 @@ class Tlemcen4 extends Component
         return view('tlemcen::livewire.tlemcen4', [
             'lesjours' => RendezvousJouractif::where('ladate', '>=', $this->currentdate)
                        ->where('nbheuredispo', '>', 0)
+                       ->where('status', '=', 'oui')
                        ->orderBy('ladate')
                        ->paginate(10)
         ])->layout('tlemcen::layouts.app');

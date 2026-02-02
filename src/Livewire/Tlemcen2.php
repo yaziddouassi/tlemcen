@@ -30,6 +30,7 @@ class Tlemcen2 extends Component
     public $madate ;
     public $ladate ;
     public $currentdate;
+    public $jouractif;
     public $heureDebut = '' ;
     public $heureFin = '' ;
     public $heureId = '' ;
@@ -320,7 +321,7 @@ class Tlemcen2 extends Component
          
           $this->js("
                Swal.fire({
-                 title: 'Attentio!',
+                 title: 'Bravo!',
                  text: 'le rendez vous a déja ete pris',
                  icon: 'error',
                  confirmButtonText: 'valider'
@@ -329,6 +330,9 @@ class Tlemcen2 extends Component
 
        }
 
+
+
+     
 
      }
 
@@ -394,7 +398,22 @@ class Tlemcen2 extends Component
        
    }
 
+   $this->jouractif = RendezvousJouractif::where('annee',$this->annee)
+                          ->where('mois',$this->mois)
+                           ->where('jour',$this->jour)
+                           ->first() ;
+
  }
+
+   public function activer() {
+      $this->jouractif->status = 'oui'  ;
+      $this->jouractif->save()  ;
+    }
+
+     public function desactiver() {
+      $this->jouractif->status = 'non'  ;
+      $this->jouractif->save()  ;
+    }
 
     public function annulerSearch() {
         $this->search = '';
