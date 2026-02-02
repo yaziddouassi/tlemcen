@@ -123,19 +123,19 @@ class Tlemcen2 extends Component
     $this->initier2($a);
     $this->initier() ;
 
-    $jouractif = RendezvousJouractif::where('annee',$this->annee)
+    $this->jouractif = RendezvousJouractif::where('annee',$this->annee)
                           ->where('mois',$this->mois)
                            ->where('jour',$this->jour)
                            ->first() ;
 
-    if( $jouractif) {
+    if( $this->jouractif) {
        if($a == 'oui') {
-          $jouractif->status = 'oui';
-          $jouractif->save();
+          $this->jouractif->status = 'oui';
+          $this->jouractif->save();
        }
        if($a == 'non') {
-          $jouractif->status = 'non';
-          $jouractif->save();
+          $this->jouractif->status = 'non';
+          $this->jouractif->save();
        }
     }
 
