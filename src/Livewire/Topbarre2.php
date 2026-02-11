@@ -17,6 +17,6 @@ class Topbarre2 extends Component
 
     public function render()
     {
-        return view('tlemcen::livewire.Topbarre2');
+        return view('tlemcen::livewire.topbarre2');
     }
 }
