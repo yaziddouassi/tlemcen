@@ -31,8 +31,8 @@
                       @foreach ($users as $key => $user)
                       <div class="bg-white p-[10px] rounded-[5px]">
                          <div class="w-full">
-                            <div>- {{$user->prenom}} {{$user->name}}</div>
-                            <div class="pl-[11px]">{{$user->email}}</div>
+                            <div>- {{$user->userprenom}} {{$user->usernom}}</div>
+                            <div class="pl-[11px]">{{$user->usermail}}</div>
                          </div>
                       </div>
                       @endforeach

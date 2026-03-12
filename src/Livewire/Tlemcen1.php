@@ -45,12 +45,12 @@ class Tlemcen1 extends Component
     {
 
          if($this->search == '') {
-           $users = \App\Models\User::paginate(4);
+           $users = \Tlemcen\Tlemcen\Models\RendezvousClient::paginate(4);
         }
 
         if($this->search != '') {
-           $users = \App\Models\User::where('name', 'like', '%'.$this->search.'%')
-                                      ->orWhere('prenom', 'like', '%'.$this->search.'%')
+           $users = \Tlemcen\Tlemcen\Models\RendezvousClient::where('usernom', 'like', '%'.$this->search.'%')
+                                      ->orWhere('userprenom', 'like', '%'.$this->search.'%')
                                      ->paginate(4);
         }
 

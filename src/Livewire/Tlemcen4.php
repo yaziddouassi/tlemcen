@@ -10,10 +10,16 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
 use Tlemcen\Tlemcen\Models\RendezvousJouractif;
+use Tlemcen\Tlemcen\Models\RendezvousClient;
+use Illuminate\Support\Facades\Auth;
 
 class Tlemcen4 extends Component
 {
     use WithPagination;
+
+    public $prenom = 'robert';
+    public $telephone = 'E2';
+    public $adresse = 'RYSU';
 
     protected $queryString = []; // 🔥 AUCUNE query dans l'URL
 
@@ -32,25 +38,46 @@ class Tlemcen4 extends Component
     }
     }
 
-    /**
-     * Reset pagination quand la date change
-     */
+  
     public function updatedCurrentdate()
     {
         $this->resetPage();
     }
 
-    /**
-     * Rendu
-     */
+   public function valider()
+    {
+     $client = new RendezvousClient();
+
+     $client->user_id =  Auth::user()->id;
+     $client->usernom =  Auth::user()->name;
+     $client->userprenom = $this->prenom ;
+     $client->usertelephone = $this->telephone ;
+     $client->usermail =  Auth::user()->email;
+     $client->useradresse = $this->adresse ;
+     $client->save()  ;
+
+     $this->js("
+               Swal.fire({
+                 title: 'Bravo!',
+                 text: 'le formulaire ',
+                 icon: 'success',
+                 confirmButtonText: 'valider'
+                               })
+                           ");
+     
+    }
+
     public function render()
     {
+
         return view('tlemcen::livewire.tlemcen4', [
             'lesjours' => RendezvousJouractif::where('ladate', '>=', $this->currentdate)
                        ->where('nbheuredispo', '>', 0)
                        ->where('status', '=', 'oui')
                        ->orderBy('ladate')
-                       ->paginate(10)
+                       ->paginate(10),
+            'client' => RendezvousClient::where('user_id',Auth::user()->id)
+                          ->first()
         ])->layout('tlemcen::layouts.app');
     }
 }

@@ -5,6 +5,7 @@ namespace Tlemcen\Tlemcen\Livewire;
 use Livewire\Component;
 use Tlemcen\Tlemcen\Models\RendezvousHoraire ;
 use Tlemcen\Tlemcen\Models\RendezvousJouractif;
+use Tlemcen\Tlemcen\Models\RendezvousClient;
 use App\Models\User ;
 use Carbon\Carbon ;
 use Auth ;
@@ -31,7 +32,9 @@ class Petitrdv extends Component
     $date = Carbon::yesterday();
     $yesterday = Carbon::create($date->year, $date->month, $date->day, 23, 59, 59, 'Europe/Paris');
 
-    $userId = Auth::id();
+    $userId = Auth::id(); 
+
+    $client = RendezvousClient::where('user_id',Auth::user()->id)->first();
 
     DB::beginTransaction();
 
@@ -63,12 +66,12 @@ class Petitrdv extends Component
 
         if ($horaire) {
             // Assign the rendezvous to the current user
-            $horaire->userid = $userId;
-            $horaire->usernom = Auth::user()->name;
-            $horaire->usermail = Auth::user()->email;
-            $horaire->userprenom = Auth::user()->prenom;
-            $horaire->usertelephone = Auth::user()->telephone;
-            $horaire->useradresse = Auth::user()->adresse;
+            $horaire->userid = $client->user_id;
+            $horaire->usernom = $client->usernom;
+            $horaire->usermail = $client->usermail;
+            $horaire->userprenom = $client->userprenom;
+            $horaire->usertelephone = $client->usertelephone;
+            $horaire->useradresse = $client->useradresse;
             $horaire->save();
 
             DB::commit(); // Commit transaction
@@ -155,6 +158,8 @@ class Petitrdv extends Component
 
     public function render()
     {
-        return view('tlemcen::livewire.petitrdv');
+        return view('tlemcen::livewire.petitrdv',[
+           
+        ]);
     }
 }

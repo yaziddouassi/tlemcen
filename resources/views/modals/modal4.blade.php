@@ -41,13 +41,13 @@ x-show="$wire.open2">
                       @foreach ($users as $key => $user)
                       <div class="bg-white p-[10px] rounded-[5px] flex">
                          <div class="w-full">
-                            <div>- {{$user->prenom}} {{$user->name}}</div>
-                            <div class="pl-[11px]">{{$user->email}}</div>
+                            <div>- {{$user->userprenom}} {{$user->usernom}}</div>
+                            <div class="pl-[11px]">{{$user->usermail}}</div>
                          </div>
                          <div class="min-w-[55px]">
-                             <button wire:click="ajouterRdv({{$user->id}},'{{$user->name}}',
-                             '{{$user->prenom}}','{{$user->email}}','{{$user->telephone}}',
-                             '{{$user->adresse}}')"
+                             <button wire:click="ajouterRdv({{$user->user_id}},'{{$user->usernom}}',
+                             '{{$user->userprenom}}','{{$user->usermail}}','{{$user->usertelephone}}',
+                             '{{$user->useradresse}}')"
                              class="bg-[blue] text-white px-3 py-2 rounded-[3px]">
                               RDV </button>
                          </div>
