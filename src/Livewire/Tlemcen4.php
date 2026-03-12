@@ -17,9 +17,9 @@ class Tlemcen4 extends Component
 {
     use WithPagination;
 
-    public $prenom = 'robert';
-    public $telephone = 'E2';
-    public $adresse = 'RYSU';
+    public $prenom = '';
+    public $telephone = '';
+    public $adresse = '';
 
     protected $queryString = []; // 🔥 AUCUNE query dans l'URL
 
@@ -46,6 +46,13 @@ class Tlemcen4 extends Component
 
    public function valider()
     {
+
+     $this->validate([
+         'prenom' => ['required'],
+         'telephone' => ['required'],
+         'adresse' => ['required'],
+       ]);
+
      $client = new RendezvousClient();
 
      $client->user_id =  Auth::user()->id;

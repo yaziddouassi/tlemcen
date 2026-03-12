@@ -7,7 +7,7 @@
      border-gray-800 border-[1px] ">
    </div>
 
-   @error("field")
+   @error($field)
    <div class="text-[red] pt-[5px]">
         <span class="error">{{ $message }}</span> 
    </div>

@@ -1,4 +1,4 @@
-div>
+<div>
 
  @if(!$client)
   <div class="m-auto max-w-[400px]">
