@@ -1,152 +1,622 @@
 <div
-  x-data="{
-    selectedDate: null,
-    currentMonth: new Date().getMonth(),
-    currentYear: new Date().getFullYear(),
+    x-data="{
+        selectedDate: null,
 
-    months: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-    days: ['Lu','Ma','Me','Je','Ve','Sa','Di'],
+        currentMonth: new Date().getMonth(),
+        currentYear: new Date().getFullYear(),
 
-    // ✅ INIT DEPUIS LIVEWIRE
-    init() {
-      if ($wire.currentdate) {
-        // ex: '2026-1-24'
-        const [y, m, d] = $wire.currentdate.split('-').map(Number)
+        months: [
+            'Janvier',
+            'Février',
+            'Mars',
+            'Avril',
+            'Mai',
+            'Juin',
+            'Juillet',
+            'Août',
+            'Septembre',
+            'Octobre',
+            'Novembre',
+            'Décembre'
+        ],
 
-        this.selectedDate = new Date(y, m - 1, d)
-        this.currentYear = y
-        this.currentMonth = m - 1
-      }
+        days: [
+            'Lu',
+            'Ma',
+            'Me',
+            'Je',
+            'Ve',
+            'Sa',
+            'Di'
+        ],
 
-      // 🔥 WATCH : redirection quand la date change
-      this.$watch('selectedDate', (value, oldValue) => {
-        if (!value) return
-        if (oldValue && value.getTime() === oldValue.getTime()) return
-        this.rediriger2()
-      })
-    },
+        /* ================= INIT ================= */
 
-    daysInMonth() {
-      return new Date(this.currentYear, this.currentMonth + 1, 0).getDate()
-    },
+        init() {
 
-    firstDayOffset() {
-      let d = new Date(this.currentYear, this.currentMonth, 1).getDay()
-      return d === 0 ? 6 : d - 1
-    },
+            /*
+             * Initialisation depuis Livewire
+             */
+            if ($wire.currentdate) {
 
-    formattedDate() {
-      if (!this.selectedDate) return '—'
-      return this.selectedDate.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    },
+                const incoming = this.parseDate($wire.currentdate)
 
-    // 🔥 FORMAT URL (SANS 0 DEVANT)
-    isoDate() {
-      if (!this.selectedDate) return ''
-      let y = this.selectedDate.getFullYear()
-      let m = this.selectedDate.getMonth() + 1
-      let d = this.selectedDate.getDate()
-      return `${y}-${m}-${d}`
-    },
+                if (incoming) {
+                    this.selectedDate = incoming
 
-    isSelected(day) {
-      if (!this.selectedDate) return false
-      return day === this.selectedDate.getDate()
-        && this.currentMonth === this.selectedDate.getMonth()
-        && this.currentYear === this.selectedDate.getFullYear()
-    },
+                    this.currentYear = incoming.getFullYear()
+                    this.currentMonth = incoming.getMonth()
+                }
+            }
 
-    selectDate(day) {
-      this.selectedDate = new Date(this.currentYear, this.currentMonth, day)
-    },
 
-    prevMonth() {
-      this.currentMonth--
-      if (this.currentMonth < 0) {
-        this.currentMonth = 11
-        this.currentYear--
-      }
-    },
+            /*
+             * Surveillance de selectedDate
+             *
+             * IMPORTANT :
+             * Alpine / Livewire peut parfois fournir une string
+             * au lieu d'un objet Date.
+             */
+            this.$watch('selectedDate', (value) => {
 
-    nextMonth() {
-      this.currentMonth++
-      if (this.currentMonth > 11) {
-        this.currentMonth = 0
-        this.currentYear++
-      }
-    },
+                if (!value) {
+                    return
+                }
 
-    // 🔥 REDIRECTION
-    rediriger2() {
-      if (!this.selectedDate) return
 
-      const annee = this.selectedDate.getFullYear()
-      const mois  = this.selectedDate.getMonth() + 1
-      const jour  = this.selectedDate.getDate()
+                /*
+                 * Toujours convertir en Date
+                 */
+                if (!(value instanceof Date)) {
 
-      const url = `/admin/rendez-vous/${annee}-${mois}-${jour}/journee`
-      window.Livewire.navigate(url)
-    }
-  }"
-  class="w-80 mx-auto select-none"
+                    const converted = this.parseDate(value)
+
+                    if (!converted) {
+                        this.selectedDate = null
+                        return
+                    }
+
+                    value = converted
+                    this.selectedDate = converted
+                }
+
+
+                /*
+                 * Vérification que la Date est valide
+                 */
+                if (isNaN(value.getTime())) {
+                    this.selectedDate = null
+                    return
+                }
+
+
+                /*
+                 * Normalisation de l'heure
+                 */
+                value.setHours(0, 0, 0, 0)
+
+
+                /*
+                 * Redirection uniquement si la date
+                 * a réellement changé
+                 */
+                this.rediriger2()
+            })
+
+
+            /*
+             * Synchronisation si currentdate est modifié
+             * côté Livewire
+             */
+            this.$watch('$wire.currentdate', (value) => {
+
+                if (!value) {
+                    return
+                }
+
+                const incoming = this.parseDate(value)
+
+                if (!incoming) {
+                    return
+                }
+
+
+                /*
+                 * Évite une réaffectation inutile
+                 */
+                if (
+                    this.selectedDate instanceof Date &&
+                    !isNaN(this.selectedDate.getTime()) &&
+                    this.selectedDate.getTime() === incoming.getTime()
+                ) {
+                    return
+                }
+
+
+                this.selectedDate = incoming
+
+                this.currentYear = incoming.getFullYear()
+                this.currentMonth = incoming.getMonth()
+            })
+        },
+
+
+        /* ================= DATE PARSER ================= */
+
+        parseDate(value) {
+
+            if (!value) {
+                return null
+            }
+
+
+            /*
+             * Si c'est déjà un Date
+             */
+            if (value instanceof Date) {
+
+                const date = new Date(value.getTime())
+
+                date.setHours(0, 0, 0, 0)
+
+                return isNaN(date.getTime())
+                    ? null
+                    : date
+            }
+
+
+            /*
+             * Format attendu :
+             *
+             * 2026-1-24
+             * 2026-01-24
+             */
+            if (typeof value === 'string') {
+
+                const match = value.match(
+                    /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/
+                )
+
+                if (match) {
+
+                    const y = Number(match[1])
+                    const m = Number(match[2])
+                    const d = Number(match[3])
+
+                    const date = new Date(y, m - 1, d)
+
+                    date.setHours(0, 0, 0, 0)
+
+
+                    /*
+                     * Vérification contre les dates invalides
+                     *
+                     * Exemple :
+                     * 2026-2-31
+                     */
+                    if (
+                        date.getFullYear() !== y ||
+                        date.getMonth() !== m - 1 ||
+                        date.getDate() !== d
+                    ) {
+                        return null
+                    }
+
+                    return date
+                }
+            }
+
+
+            return null
+        },
+
+
+        /* ================= DATE HELPERS ================= */
+
+        daysInMonth() {
+
+            return new Date(
+                this.currentYear,
+                this.currentMonth + 1,
+                0
+            ).getDate()
+        },
+
+
+        firstDayOffset() {
+
+            const day = new Date(
+                this.currentYear,
+                this.currentMonth,
+                1
+            ).getDay()
+
+
+            /*
+             * JavaScript :
+             *
+             * Dimanche = 0
+             * Lundi    = 1
+             * ...
+             * Samedi   = 6
+             *
+             * Notre calendrier commence lundi.
+             */
+            return day === 0
+                ? 6
+                : day - 1
+        },
+
+
+        formattedDate() {
+
+            if (!(this.selectedDate instanceof Date)) {
+                return '—'
+            }
+
+            if (isNaN(this.selectedDate.getTime())) {
+                return '—'
+            }
+
+            return this.selectedDate.toLocaleDateString(
+                'fr-FR',
+                {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }
+            )
+        },
+
+
+        /*
+         * Format URL :
+         *
+         * 2026-1-24
+         *
+         * PAS :
+         *
+         * 2026-01-24
+         */
+        isoDate() {
+
+            if (!(this.selectedDate instanceof Date)) {
+                return ''
+            }
+
+            if (isNaN(this.selectedDate.getTime())) {
+                return ''
+            }
+
+            const y = this.selectedDate.getFullYear()
+
+            const m =
+                this.selectedDate.getMonth() + 1
+
+            const d =
+                this.selectedDate.getDate()
+
+            return `${y}-${m}-${d}`
+        },
+
+
+        /* ================= STATES ================= */
+
+        isSelected(day) {
+
+            if (!(this.selectedDate instanceof Date)) {
+                return false
+            }
+
+            if (isNaN(this.selectedDate.getTime())) {
+                return false
+            }
+
+            return (
+                day === this.selectedDate.getDate() &&
+                this.currentMonth === this.selectedDate.getMonth() &&
+                this.currentYear === this.selectedDate.getFullYear()
+            )
+        },
+
+
+        isToday(day) {
+
+            const today = new Date()
+
+            today.setHours(0, 0, 0, 0)
+
+            return (
+                day === today.getDate() &&
+                this.currentMonth === today.getMonth() &&
+                this.currentYear === today.getFullYear()
+            )
+        },
+
+
+        /* ================= ACTIONS ================= */
+
+        selectDate(day) {
+
+            const date = new Date(
+                this.currentYear,
+                this.currentMonth,
+                day
+            )
+
+            date.setHours(0, 0, 0, 0)
+
+            this.selectedDate = date
+        },
+
+
+        prevMonth() {
+
+            this.currentMonth--
+
+            if (this.currentMonth < 0) {
+
+                this.currentMonth = 11
+                this.currentYear--
+            }
+        },
+
+
+        nextMonth() {
+
+            this.currentMonth++
+
+            if (this.currentMonth > 11) {
+
+                this.currentMonth = 0
+                this.currentYear++
+            }
+        },
+
+
+        /* ================= REDIRECTION ================= */
+
+        rediriger2() {
+
+            if (!(this.selectedDate instanceof Date)) {
+                return
+            }
+
+            if (isNaN(this.selectedDate.getTime())) {
+                return
+            }
+
+
+            const annee =
+                this.selectedDate.getFullYear()
+
+            const mois =
+                this.selectedDate.getMonth() + 1
+
+            const jour =
+                this.selectedDate.getDate()
+
+
+            const url =
+                `/admin/rendez-vous/${annee}-${mois}-${jour}/journee`
+
+
+            /*
+             * Redirection Livewire
+             */
+            window.Livewire.navigate(url)
+        }
+    }"
+
+    class="w-80 mx-auto select-none"
 >
 
-  <!-- Date sélectionnée -->
-  <div class="text-center text-sm text-gray-600 mb-2">
-    Date choisie :
-    <strong x-text="formattedDate()"></strong>
-  </div>
 
-  <!-- Header -->
-  <div class="flex items-center justify-between px-3 py-2 bg-gray-100 rounded-t-lg border-b">
-    <button @click="prevMonth" class="p-2 rounded-full hover:bg-gray-200">←</button>
+    <!-- ================= DATE SÉLECTIONNÉE ================= -->
 
-    <div class="text-lg font-semibold">
-      <span x-text="months[currentMonth]"></span>
-      <span x-text="currentYear"></span>
+    <div class="text-center text-sm text-gray-600 mb-2">
+
+        Date choisie :
+
+        <strong
+            x-text="formattedDate()"
+        ></strong>
+
     </div>
 
-    <button @click="nextMonth" class="p-2 rounded-full hover:bg-gray-200">→</button>
-  </div>
 
-  <!-- Calendar -->
-  <div class="bg-white rounded-b-lg shadow p-4">
+    <!-- ================= HEADER ================= -->
 
-    <!-- Days -->
-    <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 mb-2">
-      <template x-for="d in days" :key="d">
-        <div x-text="d"></div>
-      </template>
-    </div>
+    <div
+        class="
+            flex items-center justify-between
+            px-3 py-2
+            bg-gray-100
+            rounded-t-lg
+            border-b
+        "
+    >
 
-    <!-- Grid -->
-    <div class="grid grid-cols-7 gap-1 text-center text-sm">
+        <!-- Mois précédent -->
 
-      <template x-for="i in firstDayOffset()" :key="'e'+i">
-        <div class="h-10"></div>
-      </template>
-
-      <template x-for="day in daysInMonth()" :key="day">
         <button
-          @click="selectDate(day)"
-          class="h-10 w-10 rounded-full flex items-center justify-center transition
-                 hover:bg-gray-100 focus:outline-none"
-          :class="{
-            'bg-indigo-600 text-white font-bold shadow': isSelected(day)
-          }"
+            type="button"
+            @click="prevMonth()"
+            class="
+                p-2
+                rounded-full
+                hover:bg-gray-200
+                focus:outline-none
+            "
         >
-          <span x-text="day"></span>
+            ←
         </button>
-      </template>
+
+
+        <!-- Mois / Année -->
+
+        <div class="text-lg font-semibold">
+
+            <span
+                x-text="months[currentMonth]"
+            ></span>
+
+            <span
+                x-text="currentYear"
+            ></span>
+
+        </div>
+
+
+        <!-- Mois suivant -->
+
+        <button
+            type="button"
+            @click="nextMonth()"
+            class="
+                p-2
+                rounded-full
+                hover:bg-gray-200
+                focus:outline-none
+            "
+        >
+            →
+        </button>
 
     </div>
-  </div>
 
-  <!-- Input caché -->
-  <input type="hidden" name="selected_date" :value="isoDate()">
+
+    <!-- ================= CALENDAR ================= -->
+
+    <div
+        class="
+            bg-white
+            rounded-b-lg
+            shadow
+            p-4
+        "
+    >
+
+
+        <!-- ================= JOURS ================= -->
+
+        <div
+            class="
+                grid grid-cols-7
+                gap-1
+                text-center
+                text-xs
+                font-medium
+                text-gray-500
+                mb-2
+            "
+        >
+
+            <template
+                x-for="d in days"
+                :key="d"
+            >
+
+                <div
+                    x-text="d"
+                ></div>
+
+            </template>
+
+        </div>
+
+
+        <!-- ================= GRILLE ================= -->
+
+        <div
+            class="
+                grid grid-cols-7
+                gap-1
+                text-center
+                text-sm
+            "
+        >
+
+
+            <!-- Cases vides -->
+
+            <template
+                x-for="i in firstDayOffset()"
+                :key="'empty-' + i"
+            >
+
+                <div
+                    class="h-10"
+                ></div>
+
+            </template>
+
+
+            <!-- Jours -->
+
+            <template
+                x-for="day in daysInMonth()"
+                :key="day"
+            >
+
+                <button
+                    type="button"
+
+                    @click="selectDate(day)"
+
+                    class="
+                        h-10
+                        w-10
+                        rounded-full
+                        flex
+                        items-center
+                        justify-center
+                        transition
+                        focus:outline-none
+                    "
+
+                    :class="{
+
+                        /*
+                         * Date sélectionnée
+                         */
+                        'bg-indigo-600 text-white font-bold shadow':
+                            isSelected(day),
+
+                        /*
+                         * Aujourd'hui
+                         */
+                        'ring-2 ring-indigo-300':
+                            isToday(day) && !isSelected(day),
+
+                        /*
+                         * Date disponible
+                         */
+                        'hover:bg-gray-100':
+                            !isSelected(day)
+
+                    }"
+                >
+
+                    <span
+                        x-text="day"
+                    ></span>
+
+                </button>
+
+            </template>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= INPUT CACHÉ ================= -->
+
+    <input
+        type="hidden"
+        name="selected_date"
+        :value="isoDate()"
+    >
 
 </div>
