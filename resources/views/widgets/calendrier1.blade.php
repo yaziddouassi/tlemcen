@@ -1,447 +1,49 @@
-<div
-    x-data="{
-        selectedDate: null,
-
-        currentMonth: new Date().getMonth(),
-        currentYear: new Date().getFullYear(),
-
-        months: [
-            'Janvier',
-            'Février',
-            'Mars',
-            'Avril',
-            'Mai',
-            'Juin',
-            'Juillet',
-            'Août',
-            'Septembre',
-            'Octobre',
-            'Novembre',
-            'Décembre'
-        ],
-
-        days: [
-            'Lu',
-            'Ma',
-            'Me',
-            'Je',
-            'Ve',
-            'Sa',
-            'Di'
-        ],
-
-        /* ================= INIT ================= */
-
-        init() {
-
-            /*
-             * Initialisation depuis Livewire
-             */
-            if ($wire.currentdate) {
-
-                const incoming = this.parseDate($wire.currentdate)
-
-                if (incoming) {
-                    this.selectedDate = incoming
-
-                    this.currentYear = incoming.getFullYear()
-                    this.currentMonth = incoming.getMonth()
-                }
-            }
-
-
-            /*
-             * Surveillance de selectedDate
-             *
-             * IMPORTANT :
-             * Alpine / Livewire peut parfois fournir une string
-             * au lieu d'un objet Date.
-             */
-            this.$watch('selectedDate', (value) => {
-
-                if (!value) {
-                    return
-                }
-
-
-                /*
-                 * Toujours convertir en Date
-                 */
-                if (!(value instanceof Date)) {
-
-                    const converted = this.parseDate(value)
-
-                    if (!converted) {
-                        this.selectedDate = null
-                        return
-                    }
-
-                    value = converted
-                    this.selectedDate = converted
-                }
-
-
-                /*
-                 * Vérification que la Date est valide
-                 */
-                if (isNaN(value.getTime())) {
-                    this.selectedDate = null
-                    return
-                }
-
-
-                /*
-                 * Normalisation de l'heure
-                 */
-                value.setHours(0, 0, 0, 0)
-
-
-                /*
-                 * Redirection uniquement si la date
-                 * a réellement changé
-                 */
-                this.rediriger2()
-            })
-
-
-            /*
-             * Synchronisation si currentdate est modifié
-             * côté Livewire
-             */
-            this.$watch('$wire.currentdate', (value) => {
-
-                if (!value) {
-                    return
-                }
-
-                const incoming = this.parseDate(value)
-
-                if (!incoming) {
-                    return
-                }
-
-
-                /*
-                 * Évite une réaffectation inutile
-                 */
-                if (
-                    this.selectedDate instanceof Date &&
-                    !isNaN(this.selectedDate.getTime()) &&
-                    this.selectedDate.getTime() === incoming.getTime()
-                ) {
-                    return
-                }
-
-
-                this.selectedDate = incoming
-
-                this.currentYear = incoming.getFullYear()
-                this.currentMonth = incoming.getMonth()
-            })
-        },
-
-
-        /* ================= DATE PARSER ================= */
-
-        parseDate(value) {
-
-            if (!value) {
-                return null
-            }
-
-
-            /*
-             * Si c'est déjà un Date
-             */
-            if (value instanceof Date) {
-
-                const date = new Date(value.getTime())
-
-                date.setHours(0, 0, 0, 0)
-
-                return isNaN(date.getTime())
-                    ? null
-                    : date
-            }
-
-
-            /*
-             * Format attendu :
-             *
-             * 2026-1-24
-             * 2026-01-24
-             */
-            if (typeof value === 'string') {
-
-                const match = value.match(
-                    /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/
-                )
-
-                if (match) {
-
-                    const y = Number(match[1])
-                    const m = Number(match[2])
-                    const d = Number(match[3])
-
-                    const date = new Date(y, m - 1, d)
-
-                    date.setHours(0, 0, 0, 0)
-
-
-                    /*
-                     * Vérification contre les dates invalides
-                     *
-                     * Exemple :
-                     * 2026-2-31
-                     */
-                    if (
-                        date.getFullYear() !== y ||
-                        date.getMonth() !== m - 1 ||
-                        date.getDate() !== d
-                    ) {
-                        return null
-                    }
-
-                    return date
-                }
-            }
-
-
-            return null
-        },
-
-
-        /* ================= DATE HELPERS ================= */
-
-        daysInMonth() {
-
-            return new Date(
-                this.currentYear,
-                this.currentMonth + 1,
-                0
-            ).getDate()
-        },
-
-
-        firstDayOffset() {
-
-            const day = new Date(
-                this.currentYear,
-                this.currentMonth,
-                1
-            ).getDay()
-
-
-            /*
-             * JavaScript :
-             *
-             * Dimanche = 0
-             * Lundi    = 1
-             * ...
-             * Samedi   = 6
-             *
-             * Notre calendrier commence lundi.
-             */
-            return day === 0
-                ? 6
-                : day - 1
-        },
-
-
-        formattedDate() {
-
-            if (!(this.selectedDate instanceof Date)) {
-                return '—'
-            }
-
-            if (isNaN(this.selectedDate.getTime())) {
-                return '—'
-            }
-
-            return this.selectedDate.toLocaleDateString(
-                'fr-FR',
-                {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }
-            )
-        },
-
-
-        /*
-         * Format URL :
-         *
-         * 2026-1-24
-         *
-         * PAS :
-         *
-         * 2026-01-24
-         */
-        isoDate() {
-
-            if (!(this.selectedDate instanceof Date)) {
-                return ''
-            }
-
-            if (isNaN(this.selectedDate.getTime())) {
-                return ''
-            }
-
-            const y = this.selectedDate.getFullYear()
-
-            const m =
-                this.selectedDate.getMonth() + 1
-
-            const d =
-                this.selectedDate.getDate()
-
-            return `${y}-${m}-${d}`
-        },
-
-
-        /* ================= STATES ================= */
-
-        isSelected(day) {
-
-            if (!(this.selectedDate instanceof Date)) {
-                return false
-            }
-
-            if (isNaN(this.selectedDate.getTime())) {
-                return false
-            }
-
-            return (
-                day === this.selectedDate.getDate() &&
-                this.currentMonth === this.selectedDate.getMonth() &&
-                this.currentYear === this.selectedDate.getFullYear()
-            )
-        },
-
-
-        isToday(day) {
-
-            const today = new Date()
-
-            today.setHours(0, 0, 0, 0)
-
-            return (
-                day === today.getDate() &&
-                this.currentMonth === today.getMonth() &&
-                this.currentYear === today.getFullYear()
-            )
-        },
-
-
-        /* ================= ACTIONS ================= */
-
-        selectDate(day) {
-
-            const date = new Date(
-                this.currentYear,
-                this.currentMonth,
-                day
-            )
-
-            date.setHours(0, 0, 0, 0)
-
-            this.selectedDate = date
-        },
-
-
-        prevMonth() {
-
-            this.currentMonth--
-
-            if (this.currentMonth < 0) {
-
-                this.currentMonth = 11
-                this.currentYear--
-            }
-        },
-
-
-        nextMonth() {
-
-            this.currentMonth++
-
-            if (this.currentMonth > 11) {
-
-                this.currentMonth = 0
-                this.currentYear++
-            }
-        },
-
-
-        /* ================= REDIRECTION ================= */
-
-        rediriger2() {
-
-            if (!(this.selectedDate instanceof Date)) {
-                return
-            }
-
-            if (isNaN(this.selectedDate.getTime())) {
-                return
-            }
-
-
-            const annee =
-                this.selectedDate.getFullYear()
-
-            const mois =
-                this.selectedDate.getMonth() + 1
-
-            const jour =
-                this.selectedDate.getDate()
-
-
-            const url =
-                `/admin/rendez-vous/${annee}-${mois}-${jour}/journee`
-
-
-            /*
-             * Redirection Livewire
-             */
-            window.Livewire.navigate(url)
-        }
-    }"
-
-    class="w-80 mx-auto select-none"
->
-
-
-    <!-- ================= DATE SÉLECTIONNÉE ================= -->
+<div class="w-80 mx-auto select-none">
+
+    {{-- ========================================================= --}}
+    {{-- DATE SÉLECTIONNÉE --}}
+    {{-- ========================================================= --}}
 
     <div class="text-center text-sm text-gray-600 mb-2">
 
         Date choisie :
 
-        <strong
-            x-text="formattedDate()"
-        ></strong>
+        <strong>
+            {{ $formattedDate }}
+        </strong>
 
     </div>
 
 
-    <!-- ================= HEADER ================= -->
+    {{-- ========================================================= --}}
+    {{-- INFORMATIONS PHP --}}
+    {{-- ========================================================= --}}
+
+    
+
+
+    {{-- ========================================================= --}}
+    {{-- NAVIGATION --}}
+    {{-- ========================================================= --}}
 
     <div
         class="
-            flex items-center justify-between
-            px-3 py-2
+            flex
+            items-center
+            justify-between
+            px-3
+            py-2
             bg-gray-100
             rounded-t-lg
             border-b
         "
     >
 
-        <!-- Mois précédent -->
+        {{-- MOIS PRÉCÉDENT --}}
 
         <button
             type="button"
-            @click="prevMonth()"
+            wire:click="$dispatch('previousMonth')"
             class="
                 p-2
                 rounded-full
@@ -453,26 +55,20 @@
         </button>
 
 
-        <!-- Mois / Année -->
+        {{-- MOIS / ANNÉE --}}
 
         <div class="text-lg font-semibold">
 
-            <span
-                x-text="months[currentMonth]"
-            ></span>
-
-            <span
-                x-text="currentYear"
-            ></span>
+            {{ $ladate->locale('fr')->translatedFormat('F Y') }}
 
         </div>
 
 
-        <!-- Mois suivant -->
+        {{-- MOIS SUIVANT --}}
 
         <button
             type="button"
-            @click="nextMonth()"
+            wire:click="$dispatch('nextMonth')"
             class="
                 p-2
                 rounded-full
@@ -486,7 +82,9 @@
     </div>
 
 
-    <!-- ================= CALENDAR ================= -->
+    {{-- ========================================================= --}}
+    {{-- CALENDRIER --}}
+    {{-- ========================================================= --}}
 
     <div
         class="
@@ -497,12 +95,14 @@
         "
     >
 
-
-        <!-- ================= JOURS ================= -->
+        {{-- ===================================================== --}}
+        {{-- JOURS DE LA SEMAINE --}}
+        {{-- ===================================================== --}}
 
         <div
             class="
-                grid grid-cols-7
+                grid
+                grid-cols-7
                 gap-1
                 text-center
                 text-xs
@@ -512,58 +112,120 @@
             "
         >
 
-            <template
-                x-for="d in days"
-                :key="d"
-            >
-
-                <div
-                    x-text="d"
-                ></div>
-
-            </template>
+            <div>Lu</div>
+            <div>Ma</div>
+            <div>Me</div>
+            <div>Je</div>
+            <div>Ve</div>
+            <div>Sa</div>
+            <div>Di</div>
 
         </div>
 
 
-        <!-- ================= GRILLE ================= -->
+        {{-- ===================================================== --}}
+        {{-- GRILLE --}}
+        {{-- ===================================================== --}}
 
         <div
             class="
-                grid grid-cols-7
+                grid
+                grid-cols-7
                 gap-1
                 text-center
                 text-sm
             "
         >
 
+            @php
 
-            <!-- Cases vides -->
+                /*
+                |--------------------------------------------------------------------------
+                | PREMIER JOUR DU MOIS
+                |--------------------------------------------------------------------------
+                */
 
-            <template
-                x-for="i in firstDayOffset()"
-                :key="'empty-' + i"
-            >
+                $premierJour = Carbon\Carbon::create(
+                    $annee,
+                    $mois,
+                    1
+                );
 
-                <div
-                    class="h-10"
-                ></div>
+                /*
+                |--------------------------------------------------------------------------
+                | Carbon :
+                |
+                | 1 = lundi
+                | 7 = dimanche
+                |--------------------------------------------------------------------------
+                */
 
-            </template>
+                $offset = $premierJour->dayOfWeekIso - 1;
+
+                /*
+                |--------------------------------------------------------------------------
+                | NOMBRE DE JOURS DANS LE MOIS
+                |--------------------------------------------------------------------------
+                */
+
+                $nombreJours = $premierJour->daysInMonth;
+
+                /*
+                |--------------------------------------------------------------------------
+                | DATE DU JOUR
+                |--------------------------------------------------------------------------
+                */
+
+                $aujourdhui = Carbon\Carbon::now(
+                    'Europe/Paris'
+                );
+
+            @endphp
 
 
-            <!-- Jours -->
+            {{-- ================================================= --}}
+            {{-- CASES VIDES --}}
+            {{-- ================================================= --}}
 
-            <template
-                x-for="day in daysInMonth()"
-                :key="day"
-            >
+            @for($i = 0; $i < $offset; $i++)
 
-                <button
-                    type="button"
+                <div class="h-10"></div>
 
-                    @click="selectDate(day)"
+            @endfor
 
+
+            {{-- ================================================= --}}
+            {{-- JOURS --}}
+            {{-- ================================================= --}}
+
+            @for($day = 1; $day <= $nombreJours; $day++)
+
+                @php
+
+                    $dateJour = Carbon\Carbon::create(
+                        $annee,
+                        $mois,
+                        $day
+                    );
+
+                    $estSelectionne =
+                        $day == $jour;
+
+                    $estAujourdHui =
+                        $dateJour->isSameDay($aujourdhui);
+
+                @endphp
+
+
+                <a
+                    href="{{ url(
+                        '/admin/rendez-vous/' .
+                        $annee . '-' .
+                        $mois . '-' .
+                        $day .
+                        '/journee'
+                    ) }}"
+                     wire:navigate
                     class="
                         h-10
                         w-10
@@ -573,50 +235,45 @@
                         justify-center
                         transition
                         focus:outline-none
+
+                        {{ $estSelectionne
+                            ? 'bg-indigo-600 text-white font-bold shadow'
+                            : 'hover:bg-gray-100'
+                        }}
+
+                        {{ $estAujourdHui && !$estSelectionne
+                            ? 'ring-2 ring-indigo-300'
+                            : ''
+                        }}
                     "
-
-                    :class="{
-
-                        /*
-                         * Date sélectionnée
-                         */
-                        'bg-indigo-600 text-white font-bold shadow':
-                            isSelected(day),
-
-                        /*
-                         * Aujourd'hui
-                         */
-                        'ring-2 ring-indigo-300':
-                            isToday(day) && !isSelected(day),
-
-                        /*
-                         * Date disponible
-                         */
-                        'hover:bg-gray-100':
-                            !isSelected(day)
-
-                    }"
                 >
 
-                    <span
-                        x-text="day"
-                    ></span>
+                    {{ $day }}
 
-                </button>
+                </a>
 
-            </template>
+            @endfor
 
         </div>
 
     </div>
 
 
-    <!-- ================= INPUT CACHÉ ================= -->
+    {{-- ========================================================= --}}
+    {{-- INPUT CACHÉ --}}
+    {{-- ========================================================= --}}
 
     <input
         type="hidden"
         name="selected_date"
-        :value="isoDate()"
+        value="{{ $annee }}-{{ $mois }}-{{ $jour }}"
     >
+
+
+    {{-- ========================================================= --}}
+    {{-- VARIABLES UTILISABLES --}}
+    {{-- ========================================================= --}}
+
+    
 
 </div>
